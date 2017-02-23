@@ -842,11 +842,33 @@ function hideform() {
 			
 			onThreadUpdated(op);
 			//onThreadLoaded(op);
-			//移除按鈕
-			if(after==-1) $(threadNode[op]).find('.-expand-thread').each(function(){
-				if( $(this).parent().next().prop('tagName')=="BR" ) $(this).parent().next().remove();
-				$(this).parent().remove();
-			});
+			//改為收合按鈕
+			if(after==-1) {
+				var ignore = $(threadNode[op]).find('.-expand-thread').parent();
+				ignore.html('<span class="-collapse-thread text-button">[收合]</span>');
+				$(threadNode[op]).find('.post').last().after('<span class="-collapse-thread text-button" style="margin-left: 1em;">[收合]</span>');
+				$(threadNode[op]).find('.-collapse-thread').click(function(){
+					_collapseThread(op);
+				});
+			}
+		});
+	}
+	
+	function _collapseThread(op) {
+		var replies = $(threadNode[op]).find('.reply');
+		var ignoreCount = replies.length - 10;
+		// 移除上方回應，保留最後10篇回應
+		for (var i = 0; i < ignoreCount; i++) {
+			delete threadNode[$(replies[i]).attr('data-no')];
+			replies[i].remove();
+		}
+		//改為展開按鈕
+		var collapses = $(threadNode[op]).find('.-collapse-thread');
+		collapses[1].remove();
+		var ignore = $(collapses[0]).parent();
+		ignore.html('有回應 ' + ignoreCount + ' 篇被省略。<span class="-expand-thread text-button">[展開]</span>');
+		ignore.find('.-expand-thread').click(function(){
+			_expandThread(op);
 		});
 	}
 	
